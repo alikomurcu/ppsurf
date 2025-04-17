@@ -13,8 +13,23 @@ def _normalize_mesh(file_in: str, file_out: str):
     # TODO: Task 1 Start
     # TODO: normalize the mesh to [-0.5...+0.5]
     # See documentation of Trimesh: https://trimsh.org/trimesh.html#trimesh.Trimesh
-    mesh.apply_transform(trimesh.transformations.identity_matrix())  # just a placeholder
-    raise NotImplementedError('Task 1 is not implemented')  # delete this line when done
+    # mesh.apply_transform(trimesh.transformations.identity_matrix())  # just a placeholder
+
+    # Compute bounding box
+    bounds = mesh.bounds  # shape: (2, 3) -> [[min_x, min_y, min_z], [max_x, max_y, max_z]]
+
+    # Compute the center of the bounding box
+    bbox_center = (bounds[0] + bounds[1]) / 2.0
+
+    # Translate vertices to center at origin
+    mesh.vertices -= bbox_center
+
+    # Compute the scaling factor (largest extent of the bounding box)
+    scale_factor = 1.0 / np.max(bounds[1] - bounds[0])
+
+    # Apply uniform scaling to fit the mesh in [-0.5, 0.5]^3
+    mesh.vertices *= scale_factor
+
     # TODO: Task 1 End
 
     if np.min(mesh.vertices) < -0.5 or np.max(mesh.vertices) > 0.5:
