@@ -23,8 +23,35 @@ def run(args):
     # Point picking: https://mathworld.wolfram.com/TrianglePointPicking.html
     # Point picking: https://mathworld.wolfram.com/TriangleInterior.html
     # Be careful if you choose a method based on barycentric coordinates. Getting a uniform distribution there is not trivial.
-    pts = np.zeros(1)  # just a placeholder
-    raise NotImplementedError('Task 2 is not implemented')  # delete this line when done
+    # pts = np.zeros(1)  # just a placeholder
+    # raise NotImplementedError('Task 2 is not implemented')  # delete this line when done
+
+    # Initialize random number generator
+    rng = np.random.default_rng(seed)
+
+    # Get face areas and compute sampling probabilities
+    face_areas = input_mesh.area_faces
+    probabilities = face_areas / np.sum(face_areas)
+
+    # Randomly choose faces based on their area probabilities
+    chosen_faces = rng.choice(len(input_mesh.faces), size=num_samples, p=probabilities)
+
+    # Get vertex coordinates of chosen faces
+    triangles = input_mesh.triangles[chosen_faces]  # shape: (num_samples, 3, 3)
+
+    # Generate barycentric coordinates uniformly within triangles
+    u = rng.random(num_samples)
+    v = rng.random(num_samples)
+
+    # Ensure points are uniformly distributed inside triangles
+    mask = u + v > 1
+    u[mask] = 1 - u[mask]
+    v[mask] = 1 - v[mask]
+    w = 1 - u - v
+
+    # Compute the random points
+    pts = (triangles[:, 0].T * u + triangles[:, 1].T * v + triangles[:, 2].T * w).T
+
     # TODO: Task 2 End
 
     # pts must of shape (num_samples, 3)
